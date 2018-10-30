@@ -20,30 +20,46 @@ function  get_web_page( $url )
 {
    $user_agent='Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0';
 
-   $options = array(
+  
 
-       CURLOPT_CUSTOMREQUEST  =>"GET",        //set request type post or get
-       CURLOPT_USERAGENT      => $user_agent, //set user agent
-       CURLOPT_RETURNTRANSFER => true, 
-       CURLOPT_BINARYTRANSFER => true,    
-       CURLOPT_CONNECTTIMEOUT => 120,      // timeout on connect
-       CURLOPT_TIMEOUT        => 120,      // timeout on response
-       CURLOPT_PROXY          => '213.74.117.171:8888'    // stop after 10 redirects
-   );
-
-   $ch      = curl_init( $url );
-   curl_setopt_array( $ch, $options );
-   $content = curl_exec( $ch );
-   curl_close( $ch );
-   $header['content'] = $content;
-   return $header;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_PROXY, '212.202.244.90:8080');
+        curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
+        $output = curl_exec($ch);
+        curl_close($ch); 
+        $dom = new DOMDocument();
+        @$dom->loadHTMLFile($output);   
+        $anchors = $dom->getElementsByTagName('a');  
+        echo "<pre>";
+        print_r(getLinks($anchors));
+        echo "</pre>";
+ 
 }
 
-$result = get_web_page($url);
+get_web_page($url);
 
-echo "<pre>";
-print_r($result);
-echo "</pre>";
+function getLinks($anchors)
+{
+    $links =[];
+    $count = 0 ;
+
+    foreach ($anchors as $key => $element) {
+        $href = $element->getAttribute('href');
+        // if(preg_match('/^(\/)(mieten)(\/)([0-9])/',$href)){
+            $links[] = $href;
+            $count++;
+          
+        // }
+        
+    }
+    return [$links,$count];
+}
+
+// echo "<pre>";
+// print_r($result);
+// echo "</pre>";
 // function getSource($url='',$curlMaxExecTime=5 , $proxy) {
 //         $userAgent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36';
 //         $ch = curl_init();
